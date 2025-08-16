@@ -1,4 +1,4 @@
-const oracledb = require('oracledb');  
+const oracledb = require('oracledb');  // moved const to top
 require('dotenv').config();
 
 async function initOracle() {
