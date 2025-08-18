@@ -1,47 +1,19 @@
-// Update with your config settings.
+require('dotenv').config();   // must be at the very top
 
-/**
- * @type { Object.<string, import("knex").Knex.Config> }
- */
 module.exports = {
-
   development: {
-    client: 'sqlite3',
+    client: 'oracledb',
     connection: {
-      filename: './dev.sqlite3'
-    }
-  },
-
-  staging: {
-    client: 'postgresql',
-    connection: {
-      database: 'my_db',
-      user:     'username',
-      password: 'password'
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      connectString: process.env.DB_CONNECT  
     },
-    pool: {
-      min: 2,
-      max: 10
-    },
+    pool: { min: 0, max: 10 },
     migrations: {
-      tableName: 'knex_migrations'
-    }
-  },
-
-  production: {
-    client: 'postgresql',
-    connection: {
-      database: 'my_db',
-      user:     'username',
-      password: 'password'
+      directory: './migrations'
     },
-    pool: {
-      min: 2,
-      max: 10
-    },
-    migrations: {
-      tableName: 'knex_migrations'
+    seeds: {
+      directory: './seeds'
     }
   }
-
 };
