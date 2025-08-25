@@ -1,24 +1,18 @@
-require('dotenv').config();   // must be at the very top
-const oracledb = require('oracledb');
+require("dotenv").config();
+const knex = require("knex");
 
-async function initOracle() {
-    try {
-        const pool = await oracledb.createPool({
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            connectString: process.env.DB_CONNECT
-        });
-        console.log("✅ Oracle DB Connected");
+const db = knex({
+  client: "oracledb",
+  connection: {
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    connectString: process.env.DB_CONNECT
+  },
+  pool: { min: 0, max: 10 }
+});
 
-        const connection = await pool.getConnection();
-        const result = await connection.execute(`SELECT 'Hello from Oracle!' AS MESSAGE FROM dual`);
-        console.log(result.rows[0][0]);
-        await connection.close();
+db.raw("SELECT 'Hello from Knex + Oracle' AS MESSAGE FROM dual")
+  .then(res => console.log("✅ Oracle Connected:", res))
+  .catch(err => console.error("❌ Oracle Error:", err));
 
-        return pool;
-    } catch (err) {
-        console.error("❌ DB Connection Error:", err);
-    }
-}
-
-module.exports = initOracle;
+module.exports = db;
