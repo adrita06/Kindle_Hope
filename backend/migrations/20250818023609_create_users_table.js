@@ -3,8 +3,8 @@ exports.up = function(knex) {
     table.increments('id').primary();
     table.string('name').notNullable();
     table.string('email').unique().notNullable();
-    table.string('password').notNullable();
-    table.string('role');
+    table.string('user_pass').notNullable();
+    table.string('user_role');
   });
 };
 
