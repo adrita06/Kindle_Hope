@@ -11,7 +11,7 @@ module.exports = {
       password: process.env.DB_PASSWORD,  // Replace with your Oracle password
       database: process.env.DB_CONNECT,  // Replace with your Oracle database/service name
       // Alternative: use connectString
-      // connectString: 'localhost:1521/XE'
+      connectString: 'localhost:1521/XE'
     },
     pool: {
       min: 0,
