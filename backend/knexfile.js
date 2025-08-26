@@ -1,61 +1,26 @@
-require('dotenv').config();   // must be at the very top
-
 // knexfile.js
+require("dotenv").config();
+
 module.exports = {
   development: {
-    client: 'oracledb',
+    client: "oracledb",
     connection: {
-      host: 'localhost',
-      port: 1521,
-      user: process.env.DB_USER,      // Replace with your Oracle username
-      password: process.env.DB_PASSWORD,  // Replace with your Oracle password
-      database: process.env.DB_CONNECT,  // Replace with your Oracle database/service name
-      // Alternative: use connectString
-      connectString: 'localhost:1521/XE'
-    },
-    pool: {
-      min: 0,
-      max: 2,
-      createTimeoutMillis: 30000,
-      acquireTimeoutMillis: 60000,
-      idleTimeoutMillis: 30000,
-      reapIntervalMillis: 1000,
-      createRetryIntervalMillis: 100,
-      propagateCreateError: false,
-      afterCreate: function (conn, cb) {
-        conn.execute("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'", [], cb);
-      }
-    },
-    acquireConnectionTimeout: 60000,
-    migrations: {
-      directory: './migrations',
-      tableName: 'knex_migrations'
-    }
-  },
-
-  production: {
-    client: 'oracledb',
-    connection: {
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME
+      connectString: process.env.DB_CONNECT, // must be in form host:port/service_name
     },
     pool: {
       min: 0,
-      max: 3,
-      createTimeoutMillis: 30000,
-      acquireTimeoutMillis: 60000,
+      max: 5,
       idleTimeoutMillis: 30000,
-      reapIntervalMillis: 1000,
-      createRetryIntervalMillis: 100,
-      propagateCreateError: false
+      acquireTimeoutMillis: 60000,
     },
-    acquireConnectionTimeout: 60000,
     migrations: {
-      directory: './migrations',
-      tableName: 'knex_migrations'
-    }
-  }
+      directory: "./migrations", // path to your migrations folder
+      tableName: "knex_migrations",
+    },
+    seeds: {
+      directory: "./seeds", // optional, if you use seeds
+    },
+  },
 };
