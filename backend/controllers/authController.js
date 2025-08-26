@@ -88,7 +88,6 @@ const register = async (req, res) => {
     });
   }
 };
-
 // LOGIN
 const login = async (req, res) => {
   const { email, password } = req.body;
