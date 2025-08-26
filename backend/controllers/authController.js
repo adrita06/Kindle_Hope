@@ -39,8 +39,8 @@ const register = async (req, res) => {
     const userData = {
       name: name.trim(),
       email: email.toLowerCase().trim(),
-      password: hashedPassword,
-      role: role
+      user_pass: hashedPassword,
+      user_role: role
     };
     
     console.log('📊 User data to insert:', { ...userData, password: '[HIDDEN]' });
@@ -52,7 +52,7 @@ const register = async (req, res) => {
     console.log('🔍 Fetching inserted user...');
     // Fetch the inserted user
     const newUser = await db("users")
-      .select('id', 'name', 'email', 'role')
+      .select('id', 'name', 'email', 'user_role')
       .where({ email: email.toLowerCase().trim() })
       .first();
     
@@ -88,7 +88,6 @@ const register = async (req, res) => {
     });
   }
 };
-
 // LOGIN
 const login = async (req, res) => {
   const { email, password } = req.body;
