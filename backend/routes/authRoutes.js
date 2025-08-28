@@ -4,7 +4,7 @@ const { register, login } = require("../controllers/authController");
 const { verifyToken, requireRole } = require("../middlewares/authMiddleware");
 
 router.post("/register", register);
-router.post("/login", verifyToken, login);
+router.post("/login", login);
 
 // Example protected routes
 router.get("/profile", verifyToken, (req, res) => {
