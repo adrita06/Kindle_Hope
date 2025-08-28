@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export function LoginForm() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -24,12 +26,20 @@ export function LoginForm() {
       if (!res.ok) {
         setMessage(data.message || "Login failed");
         setIsSuccess(false);
+      }
+        else if (data.role == "admin") {
+        localStorage.setItem("token", data.token);
+        navigate("/admin-dashboard");
       } else {
         setMessage("Login successful! Redirecting...");
         setIsSuccess(true);
+         localStorage.setItem("token", data.token);
         setEmail("");
         setPassword("");
-        // TODO: handle redirect / token save
+        setTimeout(() => {
+          navigate("/admin-dashboard");
+        }, 1000);
+      
       }
     } catch (err) {
       console.error("Error:", err);
