@@ -37,7 +37,7 @@ export function LoginForm() {
         setEmail("");
         setPassword("");
         setTimeout(() => {
-          navigate("/admin-dashboard");
+          navigate("/home2");
         }, 1000);
       
       }

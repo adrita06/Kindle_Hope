@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-export function HomePage() {
+export function HomePage2() {
   const [causes, setCauses] = useState([]);
   const [message, setMessage] = useState("");
 
@@ -10,7 +10,7 @@ export function HomePage() {
 
   const loadCauses = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/admin/causes"); // public endpoint
+      const res = await fetch("http://localhost:5000/api/causes"); // public endpoint
       const data = await res.json();
       if (res.ok) {
         setCauses(data);
@@ -48,7 +48,7 @@ export function HomePage() {
 
   return (
     <div style={container}>
-      <h1 style={header}>🌟 Welcome to Our Causes</h1>
+      <h1 style={header}> Welcome to Our Causes</h1>
       {message && <div style={messageStyle}>{message}</div>}
       <div style={causesGrid}>
         {causes.map((c) => (

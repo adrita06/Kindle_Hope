@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './components/home-page';
+import { HomePage2 } from "./components/home-page2";
 import { RegisterForm } from './components/register-form';
 import { LoginForm } from './components/login-form';
 import { AdminDashboard } from "./components/admin-dashboard";
@@ -15,6 +16,8 @@ function App() {
           
           {/* Home page route */}
           <Route path="/home" element={<HomePage />} />
+
+           <Route path="/home2" element={<HomePage2 />} />
           
           {/* Register page route */}
           <Route path="/register" element={<RegisterForm />} />
