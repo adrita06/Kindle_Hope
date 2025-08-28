@@ -192,7 +192,7 @@ export function AdminDashboard() {
     },
 
     submitBtn: {
-      backgroundColor: "#358856",
+      backgroundColor: "#2563eb",
       color: "white",
       border: "none",
       padding: "8px 16px",
@@ -204,7 +204,7 @@ export function AdminDashboard() {
     },
 
     submitBtnHover: {
-      backgroundColor: "#358856",
+      backgroundColor: "#2563eb",
     },
 
     causesSection: {
