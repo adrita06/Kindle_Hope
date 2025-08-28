@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './components/home-page';
 import { RegisterForm } from './components/register-form';
+import { LoginForm } from './components/login-form';
 
 function App() {
   return (
@@ -18,7 +19,7 @@ function App() {
           <Route path="/register" element={<RegisterForm />} />
           
           {/* Login route placeholder - you can add your login component here */}
-          <Route path="/login" element={<div>Login page coming soon...</div>} />
+          <Route path="/login" element={<LoginForm />} />
           
           {/* Catch-all route for 404s */}
           <Route path="*" element={<Navigate to="/home" replace />} />

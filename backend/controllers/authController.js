@@ -91,18 +91,35 @@ const register = async (req, res) => {
 // LOGIN
 const login = async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password)
+
+  if (!email || !password) {
     return res.status(400).json({ message: "All fields are required" });
+  }
 
   try {
+    // fetch user from DB
     const user = await db("users").where({ email }).first();
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(400).json({ message: "Invalid credentials" });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
 
+    // make sure password exists in DB
+    if (!user.user_pass) {
+      return res
+        .status(500)
+        .json({ message: "User password is missing. Contact admin." });
+    }
+
+    // compare password safely
+    const match = await bcrypt.compare(password, user.user_pass);
+    if (!match) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // generate JWT
     const token = jwt.sign(
-      { id: user.id, role: user.role }, // fixed primary key
+      { id: user.id, role: user.user_role },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -113,5 +130,6 @@ const login = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 module.exports = { register, login };
