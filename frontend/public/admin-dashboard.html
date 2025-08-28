@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <style>
+    body { font-family: Arial; margin: 30px; }
+    .container { max-width: 600px; margin: auto; }
+    h2 { color: darkblue; }
+    form { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 8px; }
+    input, textarea { width: 100%; padding: 8px; margin: 6px 0; }
+    button { padding: 10px 15px; background: darkblue; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: navy; }
+    .cause { border: 1px solid #ddd; padding: 10px; margin-top: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Admin Login</h2>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
+
+    <div id="dashboard" style="display:none;">
+      <h2>Welcome Admin</h2>
+
+      <h3>Add New Cause</h3>
+      <form id="causeForm">
+        <input type="text" id="title" placeholder="Cause Title" required />
+        <textarea id="description" placeholder="Cause Description" required></textarea>
+        <input type="number" id="goal" placeholder="Goal Amount" required />
+        <button type="submit">Add Cause</button>
+      </form>
+
+      <h3>All Causes</h3>
+      <div id="causesList"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:5000/api"; // backend base URL
+    let token = "";
+
+    // Admin Login
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const res = await fetch(`${API_URL}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        console.log("Login response:", data, "Status:", res.status);
+
+        // Check for successful login and admin role
+        if (res.ok && data.token && data.role === "admin") {
+          token = data.token;
+          document.getElementById("loginForm").style.display = "none";
+          document.getElementById("dashboard").style.display = "block";
+          loadCauses();
+        } else {
+          alert(data.message || "Invalid admin credentials");
+        }
+      } catch (err) {
+        console.error("Login fetch error:", err);
+        alert("Something went wrong. Please check the backend.");
+      }
+    });
+
+    // Add Cause
+    document.getElementById("causeForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const title = document.getElementById("title").value;
+      const description = document.getElementById("description").value;
+      const goal_amount = document.getElementById("goal").value;
+
+      try {
+        const res = await fetch(`${API_URL}/admin/causes`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+          },
+          body: JSON.stringify({ title, description, goal_amount })
+        });
+        const data = await res.json();
+        alert(data.message || "Cause added!");
+        loadCauses();
+      } catch (err) {
+        console.error("Add cause error:", err);
+        alert("Failed to add cause. Check backend.");
+      }
+    });
+
+    // Load Causes
+    async function loadCauses() {
+      try {
+        const res = await fetch(`${API_URL}/admin/causes`, {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        const causes = await res.json();
+
+        const listDiv = document.getElementById("causesList");
+        listDiv.innerHTML = "";
+        causes.forEach(c => {
+          listDiv.innerHTML += `
+            <div class="cause">
+              <strong>${c.title}</strong><br>
+              ${c.description}<br>
+              Goal: $${c.goal_amount} | Collected: $${c.collected_amount}
+            </div>
+          `;
+        });
+      } catch (err) {
+        console.error("Load causes error:", err);
+      }
+    }
+  </script>
+</body>
+</html>
