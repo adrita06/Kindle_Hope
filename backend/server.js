@@ -1,15 +1,25 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require('cors');
+const adminRoutes = require("./routes/adminRoutes");
 const authRoutes = require("./routes/authRoutes");
 const recurringDonationRoutes = require('./routes/recurringDonationRoutes');
+const causesRoutes = require("./routes/causesRoutes");
+const donationRoutes = require("./routes/donationRoutes");
+ 
 
 // Enable CORS first
 app.use(cors({ origin: 'http://localhost:3000' }));
 
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+
 app.use("/api/recurringDonation", recurringDonationRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/causes", causesRoutes);
+app.use("/api/donations", donationRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 
