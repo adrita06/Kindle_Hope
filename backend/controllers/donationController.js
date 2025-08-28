@@ -60,10 +60,6 @@ const donate = async (req, res) => {
       });
     }
 
-    // Update collected_amount in causes table
-    await db("causes")
-      .where({ cause_id })
-      .increment("collected_amount", Number(amount));
 
     res.json({ message: "Donation successful" });
   } catch (err) {
