@@ -4,7 +4,7 @@ export function RegisterForm() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [role, setRole] = useState("Student")
+  const [role, setRole] = useState("Donor")
   const [message, setMessage] = useState("")
   const [isSuccess, setIsSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -32,7 +32,7 @@ export function RegisterForm() {
         setName("")
         setEmail("")
         setPassword("")
-        setRole("Student")
+        setRole("Donor")
       }
     } catch (err) {
       console.error("Error:", err)
@@ -166,7 +166,7 @@ export function RegisterForm() {
     <div style={containerStyle}>
       <div style={wrapperStyle}>
         <div style={headerStyle}>
-          <h1 style={titleStyle}>Join Our Community</h1>
+          <h1 style={titleStyle}>Join Our Community as Donor</h1>
           <p style={subtitleStyle}>Register for the donation management system</p>
         </div>
         
@@ -233,20 +233,12 @@ export function RegisterForm() {
 
             <div style={inputGroupStyle}>
               <label style={labelStyle}>Role</label>
-              <select
+              <input
+                type="text"
                 value={role}
-                onChange={(e) => setRole(e.target.value)}
-                style={{...inputStyle, backgroundColor: "white"}}
-                onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
-                onBlur={(e) => {
-                  e.target.style.borderColor = "#d1d5db"
-                  e.target.style.boxShadow = "none"
-                }}
-              >
-                <option value="Student">Student</option>
-                <option value="Faculty">Faculty</option>
-                <option value="PGC">PGC</option>
-              </select>
+                readOnly
+                style={{...inputStyle, backgroundColor: "#f3f4f6"}}
+              />
             </div>
 
             <button
