@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-export function HomePage2() {
+export default function HomePage2() {
   const [causes, setCauses] = useState([]);
   const [message, setMessage] = useState("");
   const [donateCause, setDonateCause] = useState(null);
@@ -30,7 +30,7 @@ export function HomePage2() {
   };
 
   const handleDonate = async () => {
-    const token = localStorage.getItem("token"); // must be logged in
+    const token = localStorage.getItem("token");
     if (!token) {
       setDonateMessage("You must be logged in to donate.");
       return;
@@ -62,12 +62,12 @@ export function HomePage2() {
       if (!res.ok) {
         setDonateMessage(data.message || "Donation failed");
       } else {
-        setDonateMessage("Donation successful! Thank you 💚");
+        setDonateMessage("✅ Donation successful! Thank you 💚");
         setDonateCause(null);
         setDonateAmount("");
         setAnonymous(false);
         setRecurring(false);
-        loadCauses(); // refresh causes
+        loadCauses();
       }
     } catch (err) {
       console.error(err);
@@ -75,97 +75,112 @@ export function HomePage2() {
     }
   };
 
-  // --- Styles ---
-  const container = { padding: "20px", fontFamily: "Arial, sans-serif" };
-  const header = { textAlign: "center", marginBottom: "30px", color: "#1f2937" };
-  const causesGrid = {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-    gap: "20px",
-  };
-  const causeCard = {
-    padding: "15px",
-    borderRadius: "10px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    backgroundColor: "white",
-  };
-  const donateModal = {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100vw",
-    height: "100vh",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 9999,
-  };
-  const modalContent = {
-    backgroundColor: "white",
-    padding: "20px",
-    borderRadius: "10px",
-    width: "300px",
-    boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
-  };
-  const inputStyle = { width: "100%", padding: "8px", marginBottom: "10px", borderRadius: "6px", border: "1px solid #ccc" };
-  const checkboxLabel = { display: "block", marginBottom: "8px" };
-  const messageStyle = {
-    padding: "10px",
-    borderRadius: "8px",
-    marginBottom: "20px",
-    backgroundColor: "#fef3c7",
-    color: "#b45309",
-    textAlign: "center",
-  };
-
   return (
-    <div style={container}>
-      <h1 style={header}>🌟 Welcome to Our Causes</h1>
-      {message && <div style={messageStyle}>{message}</div>}
+    <div className="p-6 font-sans bg-gray-50 min-h-screen">
+      <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">
+        🌟 Welcome to Our Causes
+      </h1>
 
-      <div style={causesGrid}>
+      {message && (
+        <div className="bg-yellow-100 text-yellow-700 p-3 rounded-lg mb-4 text-center">
+          {message}
+        </div>
+      )}
+
+      {/* Causes Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {causes.map((c) => (
-          <div key={c.cause_id} style={causeCard}>
-            <h3>{c.title}</h3>
-            <p>{c.description}</p>
-            <p>
-              <strong>Goal:</strong> ${c.goal_amount} | <strong>Collected:</strong> $
-              {c.collected_amount || 0}
-            </p>
-            <button onClick={() => setDonateCause(c)}>Donate 💚</button>
+          <div
+            key={c.cause_id}
+            className="bg-white rounded-xl shadow-md p-5 flex flex-col justify-between"
+          >
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800">{c.title}</h3>
+              <p className="text-gray-600 text-sm mt-2">{c.description}</p>
+              <p className="mt-3 text-gray-700">
+                <strong>Goal:</strong> ${c.goal_amount} |{" "}
+                <strong>Collected:</strong> ${c.collected_amount || 0}
+              </p>
+            </div>
+            <button
+              onClick={() => setDonateCause(c)}
+              className="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+            >
+              Donate 💚
+            </button>
           </div>
         ))}
       </div>
 
+      {/* Donate Modal */}
       {donateCause && (
-        <div style={donateModal} onClick={() => setDonateCause(null)}>
-          <div style={modalContent} onClick={(e) => e.stopPropagation()}>
-            <h3>Donate to {donateCause.title}</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-lg w-96 relative">
+            <h3 className="text-lg font-bold mb-4">
+              Donate to {donateCause.title}
+            </h3>
+
             <input
               type="number"
               placeholder="Enter amount"
               value={donateAmount}
               onChange={(e) => setDonateAmount(e.target.value)}
-              style={inputStyle}
+              className="w-full border p-2 rounded mb-3"
             />
-            <label style={checkboxLabel}>
-              <input type="checkbox" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} /> Donate anonymously
+
+            <label className="block mb-2">
+              <input
+                type="checkbox"
+                checked={anonymous}
+                onChange={(e) => setAnonymous(e.target.checked)}
+                className="mr-2"
+              />
+              Donate anonymously
             </label>
-            <label style={checkboxLabel}>
-              <input type="checkbox" checked={recurring} onChange={(e) => setRecurring(e.target.checked)} /> Recurring donation
+
+            <label className="block mb-2">
+              <input
+                type="checkbox"
+                checked={recurring}
+                onChange={(e) => setRecurring(e.target.checked)}
+                className="mr-2"
+              />
+              Recurring donation
             </label>
+
             {recurring && (
-              <select value={frequency} onChange={(e) => setFrequency(e.target.value)} style={inputStyle}>
+              <select
+                value={frequency}
+                onChange={(e) => setFrequency(e.target.value)}
+                className="w-full border p-2 rounded mb-3"
+              >
                 <option value="daily">Daily</option>
                 <option value="weekly">Weekly</option>
                 <option value="monthly">Monthly</option>
                 <option value="yearly">Yearly</option>
               </select>
             )}
-            <button onClick={handleDonate}>Confirm Donate</button>
-            {donateMessage && <div style={messageStyle}>{donateMessage}</div>}
-            <button onClick={() => setDonateCause(null)} style={{ marginTop: "10px" }}>Cancel</button>
+
+            {donateMessage && (
+              <div className="bg-blue-100 text-blue-700 p-2 rounded text-sm mb-3">
+                {donateMessage}
+              </div>
+            )}
+
+            <div className="flex justify-between">
+              <button
+                onClick={handleDonate}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+              >
+                Confirm Donate
+              </button>
+              <button
+                onClick={() => setDonateCause(null)}
+                className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400 transition"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
