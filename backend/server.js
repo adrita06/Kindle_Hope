@@ -5,7 +5,8 @@ const cors = require('cors');
 const adminRoutes = require("./routes/adminRoutes");
 const authRoutes = require("./routes/authRoutes");
 const causesRoutes = require("./routes/causesRoutes");
-
+const donationRoutes = require("./routes/donationRoutes");
+ 
 
 
 // Enable CORS first
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/causes", causesRoutes);
+app.use("/api/donations", donationRoutes);
 
 
 const PORT = process.env.PORT || 5000;
