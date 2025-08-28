@@ -17,10 +17,15 @@ exports.up = function (knex) {
       .references('id')
       .inTable('users')
       .onDelete('CASCADE');
+   table
+      .integer('cause_id')
+      .unsigned()
+      .references('cause_id')
+      .inTable('causes')
+      .onDelete('CASCADE');
   });
 };
 
 exports.down = function (knex) {
   return knex.schema.dropTable('donation_schedule');
 };
-
