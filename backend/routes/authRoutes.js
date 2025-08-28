@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const authController = require("../controllers/authController");
+const { register, login } = require("../controllers/authController");
 const { verifyToken, requireRole } = require("../middlewares/authMiddleware");
 
-router.post("/register", authController.register);
-router.post("/login", authController.login);
+router.post("/register", register);
+router.post("/login", verifyToken, login);
 
 // Example protected routes
 router.get("/profile", verifyToken, (req, res) => {
