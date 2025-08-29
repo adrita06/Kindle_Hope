@@ -1,60 +1,103 @@
 const db = require("../config/db");
 
 const create = async (req, res) => {
-  console.log('🚀 Recurring Donation request received');
-  console.log('📝 Request body:', req.body);
-
   try {
-    const { amount, frequency, start_date, end_date } = req.body;
+    const { amount, frequency, end_date, cause_id } = req.body;
+    const user_id = req.user.id;
 
-    // Extract user_id from authenticated request (JWT middleware should set req.user)
-    const user_id = req.user?.id;
-    const cause_id = req.cause?.id;
-    const next_payment_date = start_date; // Initial next payment date is the start date  
+    // Convert strings to Date objects
+    const start_date = new Date(); // today
+    const next_payment_date = new Date(); // same as start_date
+    const parsedEndDate = new Date(end_date); // parse frontend string
 
-    // Validate input
-    if (!amount || !frequency || !start_date || !end_date || !user_id) {
-      console.log('❌ Missing required fields');
+    // Validation
+    if (!amount || !frequency || !end_date || !cause_id || !user_id) {
       return res.status(400).json({
-        message: "All fields (amount, frequency, start_date, end_date, user_id) are required"
+        message: "Missing required fields",
+        details: { amount, frequency, end_date, cause_id, user_id },
       });
     }
 
+    // Prepare data for DB
     const donationScheduleData = {
-      amount,
+      amount: Number(amount),
       frequency,
-      start_date,
-      end_date,
-      next_payment_date,
+      start_date,          // Date object
+      end_date: parsedEndDate, // Date object
+      next_payment_date,   // Date object
       user_id,
-      cause_id
+      cause_id,
     };
 
-    // Insert donation schedule
-    const insertResult = await db("donation_schedule").insert(donationScheduleData);
-    console.log('📝 Insert result:', insertResult);
-
-    // Fetch the inserted schedule (optional, but good for confirmation)
-    const newSchedule = await db("donation_schedule")
-      .where({ id: insertResult[0] })
-      .first();
-
-    console.log('📅 New donation schedule created:', newSchedule);
+    // Insert
+    let newSchedule;
+    try {
+      [newSchedule] = await db("donation_schedule")
+        .insert(donationScheduleData)
+        .returning("*"); // Postgres
+    } catch (err) {
+      await db("donation_schedule").insert(donationScheduleData);
+      newSchedule = await db("donation_schedule")
+        .where("user_id", user_id)
+        .orderBy("schedule_id", "desc")
+        .first();
+    }
 
     res.status(201).json({
       message: "Recurring donation schedule created successfully!",
-      schedule: newSchedule
+      schedule: newSchedule,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Failed to create recurring donation schedule.",
+      error: process.env.NODE_ENV === "development" ? err.message : "Internal server error",
+    });
+  }
+};
+const end = async (req, res) => {
+  try {
+    const { cause_id } = req.body;
+    const user_id = req.user.id;
+    
+    // Validation
+    if (!cause_id || !user_id) {
+      return res.status(400).json({
+        message: "Missing required fields",
+        details: { cause_id, user_id },
+      });
+    }
+
+    // Delete from donation_schedule
+    const deletedRows = await db('donation_schedule')
+      .where({ 
+        cause_id: cause_id,
+        user_id: user_id 
+      })
+      .del();
+
+    // Check if any rows were actually deleted
+    if (deletedRows === 0) {
+      return res.status(404).json({
+        message: "No recurring donation found for this user and cause",
+        details: { cause_id, user_id }
+      });
+    }
+
+    console.log(`Deleted ${deletedRows} recurring donation(s) for user ${user_id}, cause ${cause_id}`);
+    
+    res.json({
+      success: true,
+      message: "Recurring donation ended successfully",
+      deletedRows: deletedRows
     });
 
   } catch (err) {
-    console.error("❌ Donation schedule error:", err);
+    console.error('Error ending recurring donation:', err);
     res.status(500).json({
-      message: "Failed to create recurring donation schedule. Please try again.",
-      error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+      success: false,
+      error: err.message
     });
   }
 };
 
-module.exports = {
-  create
-};
+module.exports = { create , end};
