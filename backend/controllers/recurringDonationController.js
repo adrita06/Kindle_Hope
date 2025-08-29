@@ -17,6 +17,22 @@ const create = async (req, res) => {
         details: { amount, frequency, end_date, cause_id, user_id },
       });
     }
+    // 1️⃣ Check if a schedule already exists
+    const [existsResult] = await db.raw(
+      `SELECT checkIfExists(:user_id, :cause_id) AS exists_flag FROM dual`,
+      { user_id, cause_id }
+    );
+
+    // Oracle returns an array of rows with UPPERCASE column names
+    const exists = existsResult.EXISTS_FLAG === 1;
+
+    if (exists) {
+      return res.status(400).json({
+        message: "A recurring donation schedule already exists for this user and cause",
+        details: { user_id, cause_id },
+      });
+    }
+
 
     // Prepare data for DB
     const donationScheduleData = {
