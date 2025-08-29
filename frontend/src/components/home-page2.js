@@ -8,6 +8,7 @@ export function HomePage2() {
   const [anonymous, setAnonymous] = useState(false);
   const [recurring, setRecurring] = useState(false);
   const [frequency, setFrequency] = useState("monthly");
+  const [endDate, setEndDate] = useState(""); // ✅ new field for recurring
   const [token] = useState(localStorage.getItem("token"));
 
   useEffect(() => {
@@ -33,19 +34,30 @@ export function HomePage2() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/donations", {
+      const url = recurring
+        ? "http://localhost:5000/api/recurringDonation/create"
+        : "http://localhost:5000/api/donations";
+
+      const bodyData = recurring
+        ? {
+            cause_id: donateCause.cause_id,
+            amount: donateAmount,
+            frequency,
+            end_date: endDate,
+          }
+        : {
+            cause_id: donateCause.cause_id,
+            amount: donateAmount,
+            anonymous,
+          };
+
+      const res = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          cause_id: donateCause.cause_id,
-          amount: donateAmount,
-          anonymous,
-          recurring,
-          frequency,
-        }),
+        body: JSON.stringify(bodyData),
       });
 
       const data = await res.json();
@@ -53,6 +65,10 @@ export function HomePage2() {
         alert(data.message);
         setDonateCause(null);
         setDonateAmount("");
+        setAnonymous(false);
+        setRecurring(false);
+        setFrequency("monthly");
+        setEndDate("");
         loadCauses();
       } else {
         alert(data.message || "Donation failed");
@@ -160,6 +176,7 @@ export function HomePage2() {
                   type="checkbox"
                   checked={anonymous}
                   onChange={(e) => setAnonymous(e.target.checked)}
+                  disabled={recurring} // ✅ disable anonymous when recurring
                 />{" "}
                 Donate anonymously
               </label>
@@ -174,22 +191,36 @@ export function HomePage2() {
                 Recurring donation
               </label>
               {recurring && (
-                <select
-                  value={frequency}
-                  onChange={(e) => setFrequency(e.target.value)}
-                  style={{
-                    width: "100%",
-                    marginTop: "8px",
-                    borderRadius: "8px",
-                    padding: "6px",
-                    border: "1px solid #86efac",
-                  }}
-                >
-                  <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                  <option value="yearly">Yearly</option>
-                </select>
+                <>
+                  <select
+                    value={frequency}
+                    onChange={(e) => setFrequency(e.target.value)}
+                    style={{
+                      width: "100%",
+                      marginTop: "8px",
+                      borderRadius: "8px",
+                      padding: "6px",
+                      border: "1px solid #86efac",
+                    }}
+                  >
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                  </select>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    style={{
+                      width: "100%",
+                      marginTop: "8px",
+                      borderRadius: "8px",
+                      padding: "6px",
+                      border: "1px solid #86efac",
+                    }}
+                  />
+                </>
               )}
             </div>
             <div style={{ marginTop: "15px", display: "flex", gap: "10px" }}>

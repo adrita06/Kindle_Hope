@@ -1,4 +1,3 @@
-// knexfile.js
 require("dotenv").config();
 
 module.exports = {
@@ -7,7 +6,7 @@ module.exports = {
     connection: {
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
-      connectString: process.env.DB_CONNECT, // must be in form host:port/service_name
+      connectString: process.env.DB_CONNECT,
     },
     pool: {
       min: 0,
@@ -16,11 +15,11 @@ module.exports = {
       acquireTimeoutMillis: 60000,
     },
     migrations: {
-      directory: "./migrations", // path to your migrations folder
+      directory: "./migrations",
       tableName: "knex_migrations",
     },
     seeds: {
-      directory: "./seeds", // optional, if you use seeds
+      directory: "./seeds",
     },
   },
 };

@@ -8,8 +8,8 @@ exports.up = async function(knex) {
     BEFORE DELETE ON "donation_schedule"
     FOR EACH ROW
     BEGIN
-      INSERT INTO "recurring_donation_history"(schedule_id, user_id, cause_id, amount, start_date, end_date)
-      VALUES (:OLD.schedule_id, :OLD.user_id, :OLD.cause_id, :OLD.amount, :OLD.start_date, SYSDATE);
+      INSERT INTO "recurring_donation_history"("schedule_id", "user_id", "cause_id", "amount", "start_date", "end_date")
+      VALUES (:OLD."schedule_id", :OLD."user_id", :OLD."cause_id", :OLD."amount", :OLD."start_date", SYSDATE);
     END;
   `);
 };

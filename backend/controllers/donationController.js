@@ -16,30 +16,6 @@ const donate = async (req, res) => {
 
   try {
     const donationDate = new Date();
-
-    
-    let nextPaymentDate = null;
-    if (recurring && frequency) {
-      nextPaymentDate = new Date(donationDate); 
-      switch (frequency) {
-        case "daily":
-          nextPaymentDate.setDate(nextPaymentDate.getDate() + 1);
-          break;
-        case "weekly":
-          nextPaymentDate.setDate(nextPaymentDate.getDate() + 7);
-          break;
-        case "monthly":
-          nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
-          break;
-        case "yearly":
-          nextPaymentDate.setFullYear(nextPaymentDate.getFullYear() + 1);
-          break;
-        default:
-          return res.status(400).json({ message: "Invalid frequency" });
-      }
-    }
-
-    // Insert donation into donations table
     await db("donations").insert({
       cause_id,
       user_id,
