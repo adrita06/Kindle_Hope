@@ -4,8 +4,8 @@ const { getDonorLeaderboard, getRecurringDonations, getOneTimeDonations, endRecu
 const { verifyToken, requireRole } = require("../middlewares/authMiddleware");
 
 
-router.get('/leaderboard', getDonorLeaderboard);
-router.get('/recurring-donations', getRecurringDonations);
-router.get('/onetime-donations', getOneTimeDonations);
-router.put('/end/:scheduleId', endRecurringDonation);
+router.get('/leaderboard', verifyToken, getDonorLeaderboard);
+router.get('/recurring-donations', verifyToken, getRecurringDonations);
+router.get('/onetime-donations', verifyToken, getOneTimeDonations);
+router.put('/end/:scheduleId', verifyToken, endRecurringDonation);
 module.exports = router;

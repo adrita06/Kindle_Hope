@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 export function HomePage2() {
   const [causes, setCauses] = useState([]);
@@ -11,20 +11,14 @@ export function HomePage2() {
   const [endDate, setEndDate] = useState("");
   const [token] = useState(localStorage.getItem("token"));
 
-  // Analytics states
+  // Analytics
   const [leaderboard, setLeaderboard] = useState([]);
   const [recurringDonations, setRecurringDonations] = useState([]);
   const [oneTimeDonations, setOneTimeDonations] = useState([]);
   const [confirmEnd, setConfirmEnd] = useState(null);
 
-  useEffect(() => {
-    loadCauses();
-    loadLeaderboard();
-    loadRecurringDonations();
-    loadOneTimeDonations();
-  }, []);
-
-  const loadCauses = async () => {
+  // --- Loaders ---
+  const loadCauses = useCallback(async () => {
     try {
       const res = await fetch("http://localhost:5000/api/causes");
       const data = await res.json();
@@ -34,95 +28,71 @@ export function HomePage2() {
       console.error(err);
       setMessage("Something went wrong while fetching causes");
     }
-  };
+  }, []);
 
-  const loadLeaderboard = async () => {
+  const loadLeaderboard = useCallback(async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/analytics/leaderboard");
+      const res = await fetch("http://localhost:5000/api/analytics/leaderboard", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await res.json();
       if (res.ok) {
-        // Convert total_donated to numbers and sort by total_donated in descending order (highest first)
-        const sortedData = data.map(item => ({
-          ...item,
-          total_donated: parseFloat(item.total_donated) || 0
-        })).sort((a, b) => b.total_donated - a.total_donated);
+        const sortedData = data
+          .map((item) => ({ ...item, total_donated: parseFloat(item.total_donated) || 0 }))
+          .sort((a, b) => b.total_donated - a.total_donated);
         setLeaderboard(sortedData);
       }
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [token]);
 
-  const loadRecurringDonations = async () => {
+  const loadRecurringDonations = useCallback(async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/analytics/recurring-donations");
+      const res = await fetch("http://localhost:5000/api/analytics/recurring-donations", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await res.json();
       if (res.ok) setRecurringDonations(data);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [token]);
 
-  const loadOneTimeDonations = async () => {
+  const loadOneTimeDonations = useCallback(async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/analytics/onetime-donations");
+      const res = await fetch("http://localhost:5000/api/analytics/onetime-donations", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await res.json();
       if (res.ok) setOneTimeDonations(data);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [token]);
 
+  // --- End Recurring Donation ---
   const handleEndRecurring = async (scheduleId) => {
-    if (!token) {
-      alert("You must be logged in!");
-      return;
-    }
-
     try {
-      const res = await fetch(`http://localhost:5000/api/analytics/end/${scheduleId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+      const res = await fetch(`http://localhost:5000/api/recurringDonation/end/${scheduleId}`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       const data = await res.json();
       if (res.ok) {
-        alert("Recurring donation ended successfully");
-        loadRecurringDonations(); // Refresh the table
-        loadLeaderboard(); // Refresh leaderboard if needed
-        setConfirmEnd(null); // Close confirmation modal
-      } else {
-        alert(data.message || "Failed to end recurring donation");
-      }
+        alert(data.message || "Recurring donation ended");
+        setConfirmEnd(null);
+        loadRecurringDonations();
+      } else alert(data.message || "Failed to end recurring donation");
     } catch (err) {
       console.error(err);
-      alert("Something went wrong");
+      alert("Something went wrong while ending recurring donation");
     }
   };
 
-  // Format date for better display
-  const formatDate = (dateString) => {
-    if (!dateString) return "-";
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    } catch {
-      return "-";
-    }
-  };
-
+  // --- Handle Donate ---
   const handleDonate = async () => {
-    if (!token) {
-      alert("You must be logged in to donate!");
-      return;
-    }
+    if (!token) return alert("You must be logged in to donate!");
 
     try {
       const url = recurring
@@ -130,24 +100,12 @@ export function HomePage2() {
         : "http://localhost:5000/api/donations";
 
       const bodyData = recurring
-        ? {
-            cause_id: donateCause.cause_id,
-            amount: donateAmount,
-            frequency,
-            end_date: endDate,
-          }
-        : {
-            cause_id: donateCause.cause_id,
-            amount: donateAmount,
-            anonymous,
-          };
+        ? { cause_id: donateCause.cause_id, amount: donateAmount, frequency, end_date: endDate }
+        : { cause_id: donateCause.cause_id, amount: donateAmount, anonymous };
 
       const res = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(bodyData),
       });
 
@@ -161,17 +119,33 @@ export function HomePage2() {
         setFrequency("monthly");
         setEndDate("");
         loadCauses();
-        loadLeaderboard(); // Refresh leaderboard
-        loadRecurringDonations(); // Refresh recurring donations
-        loadOneTimeDonations(); // Refresh one-time donations
-      } else {
-        alert(data.message || "Donation failed");
-      }
+        loadLeaderboard();
+        loadRecurringDonations();
+        loadOneTimeDonations();
+      } else alert(data.message || "Donation failed");
     } catch (err) {
       console.error(err);
       alert("Something went wrong during donation");
     }
   };
+
+  // --- Format Date ---
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    try {
+      return new Date(dateString).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+    } catch {
+      return "-";
+    }
+  };
+
+  // --- On Mount ---
+  useEffect(() => {
+    loadCauses();
+    loadLeaderboard();
+    loadRecurringDonations();
+    loadOneTimeDonations();
+  }, [loadCauses, loadLeaderboard, loadRecurringDonations, loadOneTimeDonations]);
 
   return (
     <div style={{ padding: "20px", backgroundColor: "#f0fdf4", minHeight: "100vh" }}>
@@ -408,57 +382,24 @@ export function HomePage2() {
               </tr>
             </thead>
             <tbody>
-              {leaderboard.map((d, i) => (
-                <tr key={d.id} style={{ 
-                  background: i % 2 ? "#f0fdf4" : "white",
-                  borderBottom: i === leaderboard.length - 1 ? "none" : "1px solid #e5e7eb"
-                }}>
-                  <td style={{ 
-                    padding: "10px 8px", 
-                    textAlign: "center",
-                    fontWeight: "bold",
-                    color: "#374151"
-                  }}>
-                    {i + 1}
-                  </td>
-                  <td style={{ 
-                    padding: "10px 8px",
-                    textAlign: "left",
-                    color: "#374151"
-                  }}>
-                    {d.name}
-                  </td>
-                  <td style={{ 
-                    padding: "10px 8px",
-                    textAlign: "left",
-                    color: "#6b7280",
-                    fontSize: "14px"
-                  }}>
-                    {d.email}
-                  </td>
-                  <td style={{ 
-                    padding: "10px 8px", 
-                    color: "#15803d", 
-                    fontWeight: "bold",
-                    textAlign: "right"
-                  }}>
-                    ${(d.total_donated || 0).toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-              {leaderboard.length === 0 && (
-                <tr>
-                  <td colSpan={4} style={{ 
-                    textAlign: "center", 
-                    padding: "20px", 
-                    color: "#dc2626",
-                    fontStyle: "italic"
-                  }}>
-                    No donors yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
+            {leaderboard.map((d, i) => (
+              <tr key={d.DONOR_KEY} style={{ background: i % 2 ? "#f0fdf4" : "white" }}>
+                <td style={{ textAlign: "center", fontWeight: "bold" }}>{i + 1}</td>
+                <td>{d.DONOR_NAME}</td>
+                <td>{d.DONOR_EMAIL || "-"}</td>
+                <td style={{ textAlign: "right", fontWeight: "bold", color: "#15803d" }}>
+                  ${d.total_donated.toLocaleString()}
+                </td>
+              </tr>
+            ))}
+            {leaderboard.length === 0 && (
+              <tr>
+                <td colSpan={4} style={{ textAlign: "center", color: "#dc2626", fontStyle: "italic" }}>
+                  No donors yet.
+                </td>
+              </tr>
+            )}
+          </tbody>
           </table>
         </div>
 
@@ -481,13 +422,6 @@ export function HomePage2() {
           }}>
             <thead>
               <tr style={{ background: "#dcfce7", color: "#166534" }}>
-                <th style={{ 
-                  padding: "12px 8px",
-                  textAlign: "left",
-                  width: "130px"
-                }}>
-                  Donor
-                </th>
                 <th style={{ 
                   padding: "12px 8px",
                   textAlign: "left",
