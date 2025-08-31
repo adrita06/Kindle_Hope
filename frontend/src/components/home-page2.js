@@ -8,11 +8,17 @@ export function HomePage2() {
   const [anonymous, setAnonymous] = useState(false);
   const [recurring, setRecurring] = useState(false);
   const [frequency, setFrequency] = useState("monthly");
-  const [endDate, setEndDate] = useState(""); // ✅ new field for recurring
+  const [endDate, setEndDate] = useState("");
   const [token] = useState(localStorage.getItem("token"));
+
+  // Analytics states
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [donationDetails, setDonationDetails] = useState([]);
 
   useEffect(() => {
     loadCauses();
+    loadLeaderboard();
+    loadDonationDetails();
   }, []);
 
   const loadCauses = async () => {
@@ -24,6 +30,48 @@ export function HomePage2() {
     } catch (err) {
       console.error(err);
       setMessage("Something went wrong while fetching causes");
+    }
+  };
+
+  const loadLeaderboard = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/analytics/leaderboard");
+      const data = await res.json();
+      if (res.ok) {
+        // Convert total_donated to numbers and sort by total_donated in descending order (highest first)
+        const sortedData = data.map(item => ({
+          ...item,
+          total_donated: parseFloat(item.total_donated) || 0
+        })).sort((a, b) => b.total_donated - a.total_donated);
+        setLeaderboard(sortedData);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const loadDonationDetails = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/analytics/donations");
+      const data = await res.json();
+      if (res.ok) setDonationDetails(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Format date for better display
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch {
+      return "-";
     }
   };
 
@@ -70,6 +118,8 @@ export function HomePage2() {
         setFrequency("monthly");
         setEndDate("");
         loadCauses();
+        loadLeaderboard(); // Refresh leaderboard
+        loadDonationDetails(); // Refresh donation details
       } else {
         alert(data.message || "Donation failed");
       }
@@ -168,6 +218,7 @@ export function HomePage2() {
                 borderRadius: "8px",
                 border: "1px solid #86efac",
                 outlineColor: "#16a34a",
+                boxSizing: "border-box",
               }}
             />
             <div>
@@ -176,7 +227,7 @@ export function HomePage2() {
                   type="checkbox"
                   checked={anonymous}
                   onChange={(e) => setAnonymous(e.target.checked)}
-                  disabled={recurring} // ✅ disable anonymous when recurring
+                  disabled={recurring}
                 />{" "}
                 Donate anonymously
               </label>
@@ -201,6 +252,7 @@ export function HomePage2() {
                       borderRadius: "8px",
                       padding: "6px",
                       border: "1px solid #86efac",
+                      boxSizing: "border-box",
                     }}
                   >
                     <option value="daily">Daily</option>
@@ -218,6 +270,7 @@ export function HomePage2() {
                       borderRadius: "8px",
                       padding: "6px",
                       border: "1px solid #86efac",
+                      boxSizing: "border-box",
                     }}
                   />
                 </>
@@ -256,6 +309,250 @@ export function HomePage2() {
           </div>
         </div>
       )}
+
+      {/* --- Analytics Section --- */}
+      <div style={{ marginTop: "40px" }}>
+        <h2 style={{ textAlign: "center", color: "#15803d", marginBottom: "18px" }}>
+          🏆 Donor Leaderboard
+        </h2>
+        <div style={{
+          maxWidth: "600px",
+          margin: "0 auto 32px auto",
+          background: "white",
+          borderRadius: "12px",
+          boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
+          padding: "18px",
+          overflowX: "auto"
+        }}>
+          <table style={{ 
+            width: "100%", 
+            borderCollapse: "collapse",
+            minWidth: "500px"
+          }}>
+            <thead>
+              <tr style={{ background: "#dcfce7", color: "#166534" }}>
+                <th style={{ 
+                  padding: "12px 8px", 
+                  borderRadius: "8px 0 0 0",
+                  textAlign: "center",
+                  width: "60px"
+                }}>
+                  #
+                </th>
+                <th style={{ 
+                  padding: "12px 8px",
+                  textAlign: "left",
+                  width: "120px"
+                }}>
+                  Donor
+                </th>
+                <th style={{ 
+                  padding: "12px 8px",
+                  textAlign: "left",
+                  width: "200px"
+                }}>
+                  Email
+                </th>
+                <th style={{ 
+                  padding: "12px 8px", 
+                  borderRadius: "0 8px 0 0",
+                  textAlign: "right",
+                  width: "120px"
+                }}>
+                  Total Donated
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {leaderboard.map((d, i) => (
+                <tr key={d.id} style={{ 
+                  background: i % 2 ? "#f0fdf4" : "white",
+                  borderBottom: i === leaderboard.length - 1 ? "none" : "1px solid #e5e7eb"
+                }}>
+                  <td style={{ 
+                    padding: "10px 8px", 
+                    textAlign: "center",
+                    fontWeight: "bold",
+                    color: "#374151"
+                  }}>
+                    {i + 1}
+                  </td>
+                  <td style={{ 
+                    padding: "10px 8px",
+                    textAlign: "left",
+                    color: "#374151"
+                  }}>
+                    {d.name}
+                  </td>
+                  <td style={{ 
+                    padding: "10px 8px",
+                    textAlign: "left",
+                    color: "#6b7280",
+                    fontSize: "14px"
+                  }}>
+                    {d.email}
+                  </td>
+                  <td style={{ 
+                    padding: "10px 8px", 
+                    color: "#15803d", 
+                    fontWeight: "bold",
+                    textAlign: "right"
+                  }}>
+                    ${(d.total_donated || 0).toLocaleString()}
+                  </td>
+                </tr>
+              ))}
+              {leaderboard.length === 0 && (
+                <tr>
+                  <td colSpan={4} style={{ 
+                    textAlign: "center", 
+                    padding: "20px", 
+                    color: "#dc2626",
+                    fontStyle: "italic"
+                  }}>
+                    No donors yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <h2 style={{ textAlign: "center", color: "#15803d", marginBottom: "18px" }}>
+          📋 Donor Donation Details
+        </h2>
+        <div style={{
+          maxWidth: "1000px",
+          margin: "0 auto",
+          background: "white",
+          borderRadius: "12px",
+          boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
+          padding: "18px",
+          overflowX: "auto"
+        }}>
+          <table style={{ 
+            width: "100%", 
+            borderCollapse: "collapse",
+            minWidth: "800px"
+          }}>
+            <thead>
+              <tr style={{ background: "#dcfce7", color: "#166534" }}>
+                <th style={{ 
+                  padding: "12px 8px",
+                  textAlign: "left",
+                  width: "150px"
+                }}>
+                  Donor
+                </th>
+                <th style={{ 
+                  padding: "12px 8px",
+                  textAlign: "left",
+                  width: "180px"
+                }}>
+                  Cause
+                </th>
+                <th style={{ 
+                  padding: "12px 8px",
+                  textAlign: "right",
+                  width: "100px"
+                }}>
+                  Amount
+                </th>
+                <th style={{ 
+                  padding: "12px 8px",
+                  textAlign: "center",
+                  width: "100px"
+                }}>
+                  Frequency
+                </th>
+                <th style={{ 
+                  padding: "12px 8px",
+                  textAlign: "center",
+                  width: "140px"
+                }}>
+                  Next Payment
+                </th>
+                <th style={{ 
+                  padding: "12px 8px",
+                  textAlign: "center",
+                  width: "100px"
+                }}>
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {donationDetails.map((row, i) => (
+                <tr key={row.schedule_id} style={{ 
+                  background: i % 2 ? "#f0fdf4" : "white",
+                  borderBottom: i === donationDetails.length - 1 ? "none" : "1px solid #e5e7eb"
+                }}>
+                  <td style={{ 
+                    padding: "10px 8px",
+                    textAlign: "left",
+                    color: "#374151",
+                    fontWeight: "500"
+                  }}>
+                    {row.donor_name}
+                  </td>
+                  <td style={{ 
+                    padding: "10px 8px",
+                    textAlign: "left",
+                    color: "#374151"
+                  }}>
+                    {row.cause_title}
+                  </td>
+                  <td style={{ 
+                    padding: "10px 8px", 
+                    color: "#15803d", 
+                    fontWeight: "bold",
+                    textAlign: "right"
+                  }}>
+                    ${(row.amount || 0).toLocaleString()}
+                  </td>
+                  <td style={{ 
+                    padding: "10px 8px",
+                    textAlign: "center",
+                    color: "#374151",
+                    textTransform: "capitalize"
+                  }}>
+                    {row.frequency}
+                  </td>
+                  <td style={{ 
+                    padding: "10px 8px",
+                    textAlign: "center",
+                    color: "#6b7280",
+                    fontSize: "14px"
+                  }}>
+                    {formatDate(row.next_payment_date)}
+                  </td>
+                  <td style={{
+                    padding: "10px 8px",
+                    textAlign: "center",
+                    color: row.status === "Active" ? "#16a34a" : "#dc2626",
+                    fontWeight: "bold",
+                    fontSize: "14px"
+                  }}>
+                    {row.status}
+                  </td>
+                </tr>
+              ))}
+              {donationDetails.length === 0 && (
+                <tr>
+                  <td colSpan={6} style={{ 
+                    textAlign: "center", 
+                    padding: "20px", 
+                    color: "#dc2626",
+                    fontStyle: "italic"
+                  }}>
+                    No donation details found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
