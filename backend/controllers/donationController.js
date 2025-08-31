@@ -25,16 +25,6 @@ const donate = async (req, res) => {
       donation_date: formatDate(donationDate),
     });
 
-    // Insert into donation_schedule if recurring
-    if (recurring && frequency) {
-      await db("donation_schedule").insert({
-        user_id,
-        amount: Number(amount),
-        frequency,
-        start_date: formatDate(donationDate),
-        next_payment_date: formatDate(nextPaymentDate),
-      });
-    }
 
 
     res.json({ message: "Donation successful" });

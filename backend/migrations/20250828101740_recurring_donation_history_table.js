@@ -10,7 +10,7 @@ exports.up = async function(knex) {
     table.integer('cause_id').notNullable();
     table.decimal('amount', 10, 2).notNullable();
     table.date('start_date').notNullable();
-    table.date('end_date').nullable(); // when donation stopped
+    table.date('end_date').nullable(); 
   });
 };
 
