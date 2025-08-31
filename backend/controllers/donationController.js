@@ -29,9 +29,11 @@ const donate = async (req, res) => {
 
     res.json({ message: "Donation successful" });
   } catch (err) {
-    console.error("Donation error:", err);
-    res.status(500).json({ message: "Donation failed" });
-  }
+  console.error("Donation error:", err); // log full error
+  const msg = err.message || "Donation failed";
+  res.status(400).json({ message: msg });
+}
+
 };
 
 module.exports = { donate };
