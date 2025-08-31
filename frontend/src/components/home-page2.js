@@ -556,7 +556,7 @@ export function HomePage2() {
         </div>
 
         <h2 style={{ textAlign: "center", color: "#15803d", marginBottom: "18px" }}>
-          💰 One-Time Donations
+          💰Donations History
         </h2>
         <div style={{
           maxWidth: "800px",
