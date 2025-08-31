@@ -425,21 +425,21 @@ export function HomePage2() {
                 <th style={{ 
                   padding: "12px 8px",
                   textAlign: "left",
-                  width: "180px"
+                  width: "200px"
                 }}>
                   Cause
                 </th>
                 <th style={{ 
                   padding: "12px 8px",
                   textAlign: "right",
-                  width: "100px"
+                  width: "120px"
                 }}>
                   Amount
                 </th>
                 <th style={{ 
                   padding: "12px 8px",
                   textAlign: "center",
-                  width: "100px"
+                  width: "120px"
                 }}>
                   Frequency
                 </th>
@@ -453,14 +453,14 @@ export function HomePage2() {
                 <th style={{ 
                   padding: "12px 8px",
                   textAlign: "center",
-                  width: "80px"
+                  width: "100px"
                 }}>
                   Status
                 </th>
                 <th style={{ 
                   padding: "12px 8px",
                   textAlign: "center",
-                  width: "80px"
+                  width: "100px"
                 }}>
                   Action
                 </th>
@@ -477,13 +477,6 @@ export function HomePage2() {
                     textAlign: "left",
                     color: "#374151",
                     fontWeight: "500"
-                  }}>
-                    {row.donor_name}
-                  </td>
-                  <td style={{ 
-                    padding: "10px 8px",
-                    textAlign: "left",
-                    color: "#374151"
                   }}>
                     {row.cause_title}
                   </td>
@@ -548,7 +541,7 @@ export function HomePage2() {
               ))}
               {recurringDonations.length === 0 && (
                 <tr>
-                  <td colSpan={7} style={{ 
+                  <td colSpan={6} style={{ 
                     textAlign: "center", 
                     padding: "20px", 
                     color: "#dc2626",
@@ -584,21 +577,14 @@ export function HomePage2() {
                 <th style={{ 
                   padding: "12px 8px",
                   textAlign: "left",
-                  width: "150px"
-                }}>
-                  Donor
-                </th>
-                <th style={{ 
-                  padding: "12px 8px",
-                  textAlign: "left",
-                  width: "200px"
+                  width: "250px"
                 }}>
                   Cause
                 </th>
                 <th style={{ 
                   padding: "12px 8px",
                   textAlign: "right",
-                  width: "100px"
+                  width: "120px"
                 }}>
                   Amount
                 </th>
@@ -612,7 +598,7 @@ export function HomePage2() {
                 <th style={{ 
                   padding: "12px 8px",
                   textAlign: "center",
-                  width: "100px"
+                  width: "120px"
                 }}>
                   Status
                 </th>
@@ -629,13 +615,6 @@ export function HomePage2() {
                     textAlign: "left",
                     color: "#374151",
                     fontWeight: "500"
-                  }}>
-                    {row.donor_name}
-                  </td>
-                  <td style={{ 
-                    padding: "10px 8px",
-                    textAlign: "left",
-                    color: "#374151"
                   }}>
                     {row.cause_title}
                   </td>
@@ -668,7 +647,7 @@ export function HomePage2() {
               ))}
               {oneTimeDonations.length === 0 && (
                 <tr>
-                  <td colSpan={5} style={{ 
+                  <td colSpan={4} style={{ 
                     textAlign: "center", 
                     padding: "20px", 
                     color: "#dc2626",
