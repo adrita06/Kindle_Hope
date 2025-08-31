@@ -6,7 +6,11 @@ const knex = require("../db/knex");
 // Public endpoint for all users
 router.get("/", async (req, res) => {
   try {
-    const causes = await knex("causes").select("*");
+    const causes = await knex("causes")
+  .select("*")
+  .whereRaw("NVL(\"collected_amount\", 0) < NVL(\"goal_amount\", 0)");
+
+
     res.json(causes);
   } catch (err) {
     console.error(err);
