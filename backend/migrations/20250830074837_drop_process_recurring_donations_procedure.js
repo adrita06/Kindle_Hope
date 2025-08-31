@@ -4,9 +4,14 @@
  */
 exports.up = async function(knex) {
   // Drop the procedure if it exists
-  return knex.raw(`
+ return knex.raw(`
     BEGIN
       EXECUTE IMMEDIATE 'DROP PROCEDURE process_recurring_donations';
+    EXCEPTION
+      WHEN OTHERS THEN
+        IF SQLCODE != -4043 THEN
+          RAISE;
+        END IF;
     END;
   `);
 };
