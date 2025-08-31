@@ -13,12 +13,15 @@ export function HomePage2() {
 
   // Analytics states
   const [leaderboard, setLeaderboard] = useState([]);
-  const [donationDetails, setDonationDetails] = useState([]);
+  const [recurringDonations, setRecurringDonations] = useState([]);
+  const [oneTimeDonations, setOneTimeDonations] = useState([]);
+  const [confirmEnd, setConfirmEnd] = useState(null);
 
   useEffect(() => {
     loadCauses();
     loadLeaderboard();
-    loadDonationDetails();
+    loadRecurringDonations();
+    loadOneTimeDonations();
   }, []);
 
   const loadCauses = async () => {
@@ -50,13 +53,53 @@ export function HomePage2() {
     }
   };
 
-  const loadDonationDetails = async () => {
+  const loadRecurringDonations = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/analytics/donations");
+      const res = await fetch("http://localhost:5000/api/analytics/recurring-donations");
       const data = await res.json();
-      if (res.ok) setDonationDetails(data);
+      if (res.ok) setRecurringDonations(data);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const loadOneTimeDonations = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/analytics/onetime-donations");
+      const data = await res.json();
+      if (res.ok) setOneTimeDonations(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleEndRecurring = async (scheduleId) => {
+    if (!token) {
+      alert("You must be logged in!");
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/analytics/end/${scheduleId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("Recurring donation ended successfully");
+        loadRecurringDonations(); // Refresh the table
+        loadLeaderboard(); // Refresh leaderboard if needed
+        setConfirmEnd(null); // Close confirmation modal
+      } else {
+        alert(data.message || "Failed to end recurring donation");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong");
     }
   };
 
@@ -119,7 +162,8 @@ export function HomePage2() {
         setEndDate("");
         loadCauses();
         loadLeaderboard(); // Refresh leaderboard
-        loadDonationDetails(); // Refresh donation details
+        loadRecurringDonations(); // Refresh recurring donations
+        loadOneTimeDonations(); // Refresh one-time donations
       } else {
         alert(data.message || "Donation failed");
       }
@@ -419,11 +463,11 @@ export function HomePage2() {
         </div>
 
         <h2 style={{ textAlign: "center", color: "#15803d", marginBottom: "18px" }}>
-          📋 Donor Donation Details
+          🔄 Recurring Donations
         </h2>
         <div style={{
-          maxWidth: "1000px",
-          margin: "0 auto",
+          maxWidth: "1100px",
+          margin: "0 auto 32px auto",
           background: "white",
           borderRadius: "12px",
           boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
@@ -433,14 +477,14 @@ export function HomePage2() {
           <table style={{ 
             width: "100%", 
             borderCollapse: "collapse",
-            minWidth: "800px"
+            minWidth: "900px"
           }}>
             <thead>
               <tr style={{ background: "#dcfce7", color: "#166534" }}>
                 <th style={{ 
                   padding: "12px 8px",
                   textAlign: "left",
-                  width: "150px"
+                  width: "130px"
                 }}>
                   Donor
                 </th>
@@ -475,17 +519,24 @@ export function HomePage2() {
                 <th style={{ 
                   padding: "12px 8px",
                   textAlign: "center",
-                  width: "100px"
+                  width: "80px"
                 }}>
                   Status
+                </th>
+                <th style={{ 
+                  padding: "12px 8px",
+                  textAlign: "center",
+                  width: "80px"
+                }}>
+                  Action
                 </th>
               </tr>
             </thead>
             <tbody>
-              {donationDetails.map((row, i) => (
+              {recurringDonations.map((row, i) => (
                 <tr key={row.schedule_id} style={{ 
                   background: i % 2 ? "#f0fdf4" : "white",
-                  borderBottom: i === donationDetails.length - 1 ? "none" : "1px solid #e5e7eb"
+                  borderBottom: i === recurringDonations.length - 1 ? "none" : "1px solid #e5e7eb"
                 }}>
                   <td style={{ 
                     padding: "10px 8px",
@@ -535,17 +586,161 @@ export function HomePage2() {
                   }}>
                     {row.status}
                   </td>
+                  <td style={{ 
+                    padding: "10px 8px",
+                    textAlign: "center"
+                  }}>
+                    {row.status === "Active" && (
+                      <button
+                        onClick={() => setConfirmEnd(row)}
+                        style={{
+                          padding: "4px 8px",
+                          backgroundColor: "#dc2626",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                          fontSize: "12px",
+                          fontWeight: "bold"
+                        }}
+                        onMouseOver={(e) => (e.target.style.backgroundColor = "#b91c1c")}
+                        onMouseOut={(e) => (e.target.style.backgroundColor = "#dc2626")}
+                      >
+                        End
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
-              {donationDetails.length === 0 && (
+              {recurringDonations.length === 0 && (
                 <tr>
-                  <td colSpan={6} style={{ 
+                  <td colSpan={7} style={{ 
                     textAlign: "center", 
                     padding: "20px", 
                     color: "#dc2626",
                     fontStyle: "italic"
                   }}>
-                    No donation details found.
+                    No recurring donations found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <h2 style={{ textAlign: "center", color: "#15803d", marginBottom: "18px" }}>
+          💰 One-Time Donations
+        </h2>
+        <div style={{
+          maxWidth: "800px",
+          margin: "0 auto",
+          background: "white",
+          borderRadius: "12px",
+          boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
+          padding: "18px",
+          overflowX: "auto"
+        }}>
+          <table style={{ 
+            width: "100%", 
+            borderCollapse: "collapse",
+            minWidth: "600px"
+          }}>
+            <thead>
+              <tr style={{ background: "#dcfce7", color: "#166534" }}>
+                <th style={{ 
+                  padding: "12px 8px",
+                  textAlign: "left",
+                  width: "150px"
+                }}>
+                  Donor
+                </th>
+                <th style={{ 
+                  padding: "12px 8px",
+                  textAlign: "left",
+                  width: "200px"
+                }}>
+                  Cause
+                </th>
+                <th style={{ 
+                  padding: "12px 8px",
+                  textAlign: "right",
+                  width: "100px"
+                }}>
+                  Amount
+                </th>
+                <th style={{ 
+                  padding: "12px 8px",
+                  textAlign: "center",
+                  width: "140px"
+                }}>
+                  Date
+                </th>
+                <th style={{ 
+                  padding: "12px 8px",
+                  textAlign: "center",
+                  width: "100px"
+                }}>
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {oneTimeDonations.map((row, i) => (
+                <tr key={row.donation_id} style={{ 
+                  background: i % 2 ? "#f0fdf4" : "white",
+                  borderBottom: i === oneTimeDonations.length - 1 ? "none" : "1px solid #e5e7eb"
+                }}>
+                  <td style={{ 
+                    padding: "10px 8px",
+                    textAlign: "left",
+                    color: "#374151",
+                    fontWeight: "500"
+                  }}>
+                    {row.donor_name}
+                  </td>
+                  <td style={{ 
+                    padding: "10px 8px",
+                    textAlign: "left",
+                    color: "#374151"
+                  }}>
+                    {row.cause_title}
+                  </td>
+                  <td style={{ 
+                    padding: "10px 8px", 
+                    color: "#15803d", 
+                    fontWeight: "bold",
+                    textAlign: "right"
+                  }}>
+                    ${(row.amount || 0).toLocaleString()}
+                  </td>
+                  <td style={{ 
+                    padding: "10px 8px",
+                    textAlign: "center",
+                    color: "#6b7280",
+                    fontSize: "14px"
+                  }}>
+                    {formatDate(row.created_at)}
+                  </td>
+                  <td style={{
+                    padding: "10px 8px",
+                    textAlign: "center",
+                    color: "#059669",
+                    fontWeight: "bold",
+                    fontSize: "14px"
+                  }}>
+                    Completed
+                  </td>
+                </tr>
+              ))}
+              {oneTimeDonations.length === 0 && (
+                <tr>
+                  <td colSpan={5} style={{ 
+                    textAlign: "center", 
+                    padding: "20px", 
+                    color: "#dc2626",
+                    fontStyle: "italic"
+                  }}>
+                    No one-time donations found.
                   </td>
                 </tr>
               )}
@@ -553,6 +748,73 @@ export function HomePage2() {
           </table>
         </div>
       </div>
+
+      {/* End Recurring Donation Confirmation Modal */}
+      {confirmEnd && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.4)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              padding: "20px",
+              borderRadius: "12px",
+              width: "400px",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+            }}
+          >
+            <h2 style={{ color: "#dc2626", marginBottom: "10px" }}>⚠️ End Recurring Donation</h2>
+            <p style={{ color: "#374151", marginBottom: "15px" }}>
+              Are you sure you want to end the recurring donation of <strong>${confirmEnd.amount}</strong> {confirmEnd.frequency} to <strong>{confirmEnd.cause_title}</strong>?
+            </p>
+            <p style={{ color: "#6b7280", fontSize: "14px", marginBottom: "20px" }}>
+              This action cannot be undone. You can always create a new recurring donation later.
+            </p>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                onClick={() => handleEndRecurring(confirmEnd.schedule_id)}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  backgroundColor: "#dc2626",
+                  color: "white",
+                  borderRadius: "8px",
+                  border: "none",
+                  cursor: "pointer",
+                  fontWeight: "bold"
+                }}
+              >
+                Yes, End Donation
+              </button>
+              <button
+                onClick={() => setConfirmEnd(null)}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  backgroundColor: "#f3f4f6",
+                  color: "#374151",
+                  borderRadius: "8px",
+                  border: "1px solid #d1d5db",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
