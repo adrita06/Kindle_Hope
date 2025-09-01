@@ -632,7 +632,7 @@ export function HomePage2() {
                     color: "#6b7280",
                     fontSize: "14px"
                   }}>
-                    {formatDate(row.created_at)}
+                    {formatDate(row.donation_date)}
                   </td>
                   <td style={{
                     padding: "10px 8px",
