@@ -450,20 +450,8 @@ export function HomePage2() {
                 }}>
                   Next Payment
                 </th>
-                <th style={{ 
-                  padding: "12px 8px",
-                  textAlign: "center",
-                  width: "100px"
-                }}>
-                  Status
-                </th>
-                <th style={{ 
-                  padding: "12px 8px",
-                  textAlign: "center",
-                  width: "100px"
-                }}>
-                  Action
-                </th>
+                
+               
               </tr>
             </thead>
             <tbody>
@@ -504,39 +492,8 @@ export function HomePage2() {
                   }}>
                     {formatDate(row.next_payment_date)}
                   </td>
-                  <td style={{
-                    padding: "10px 8px",
-                    textAlign: "center",
-                    color: row.status === "Active" ? "#16a34a" : "#dc2626",
-                    fontWeight: "bold",
-                    fontSize: "14px"
-                  }}>
-                    {row.status}
-                  </td>
-                  <td style={{ 
-                    padding: "10px 8px",
-                    textAlign: "center"
-                  }}>
-                    {row.status === "Active" && (
-                      <button
-                        onClick={() => setConfirmEnd(row)}
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#dc2626",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                          fontSize: "12px",
-                          fontWeight: "bold"
-                        }}
-                        onMouseOver={(e) => (e.target.style.backgroundColor = "#b91c1c")}
-                        onMouseOut={(e) => (e.target.style.backgroundColor = "#dc2626")}
-                      >
-                        End
-                      </button>
-                    )}
-                  </td>
+                  
+        
                 </tr>
               ))}
               {recurringDonations.length === 0 && (
@@ -600,6 +557,20 @@ export function HomePage2() {
                   textAlign: "center",
                   width: "120px"
                 }}>
+                  Recurring
+                </th>
+                 <th style={{ 
+                  padding: "12px 8px",
+                  textAlign: "center",
+                  width: "120px"
+                }}>
+                  Anonymous
+                </th>
+                <th style={{ 
+                  padding: "12px 8px",
+                  textAlign: "center",
+                  width: "120px"
+                }}>
                   Status
                 </th>
               </tr>
@@ -632,7 +603,23 @@ export function HomePage2() {
                     color: "#6b7280",
                     fontSize: "14px"
                   }}>
-                    {formatDate(row.created_at)}
+                    {formatDate(row.donation_date)}
+                  </td>
+                  <td style={{ 
+                    padding: "10px 8px",
+                    textAlign: "center",
+                    color: "#6b7280",
+                    fontSize: "14px"
+                  }}>
+                    {row.recurring_flag === 1 ? "Yes" : "No"}
+                  </td>
+                  <td style={{ 
+                    padding: "10px 8px",
+                    textAlign: "center",
+                    color: "#6b7280",
+                    fontSize: "14px"
+                  }}>
+                    {row.anonymous_flag === 1 ? "Yes" : "No"}
                   </td>
                   <td style={{
                     padding: "10px 8px",

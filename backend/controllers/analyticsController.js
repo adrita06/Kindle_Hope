@@ -39,7 +39,7 @@ exports.getDonorLeaderboard = async (req, res) => {
           ELSE 'user_' || "users"."id"
         END
       `)
-      .orderBy("total_donated", "desc");
+      .orderBy("total_donated", "desc").limit(5);
 
     console.log("Raw leaderboard:", leaderboard); // 🔍 see what Oracle actually returns
     res.json(leaderboard);
@@ -89,11 +89,11 @@ exports.getOneTimeDonations = async (req, res) => {
         'causes.title as cause_title',
         'donations.amount',
         'donations.donation_date',
-        'donations.anonymous_flag'
+        'donations.anonymous_flag',
+        'donations.recurring_flag'
       )
       .leftJoin('causes', 'donations.cause_id', 'causes.cause_id')
       .where('donations.user_id', userId)
-      .andWhere('donations.recurring_flag', false)
       .orderBy('donations.donation_date', 'desc');
 
     res.json(oneTimeDonations);
