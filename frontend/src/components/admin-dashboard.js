@@ -122,7 +122,7 @@ const handleRunRecurring = async () => {
 
         {/* Add Cause Form */}
         <div style={{ backgroundColor: "#f9fafb", padding: "20px", borderRadius: "8px", marginBottom: "24px", border: "1px solid #e5e7eb" }}>
-          <h2 style={{ color: "#374151", fontSize: "1.2rem", fontWeight: "600", marginBottom: "16px" }}>Add New Cause</h2>
+          <h2 style={{ color: "#15803d", fontSize: "1.2rem", fontWeight: "600", marginBottom: "16px" }}>Add New Cause</h2>
           <form onSubmit={handleAddCause} style={{ display: "grid", gap: "16px" }}>
             <input
               style={{ padding: "8px 12px", border: "1px solid #d1d5db", borderRadius: "6px" }}
@@ -146,7 +146,7 @@ const handleRunRecurring = async () => {
               onChange={(e) => setDescription(e.target.value)}
               required
             />
-            <button type="submit" style={{ backgroundColor: "#2563eb", color: "white", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: "500", cursor: "pointer" }}>
+            <button type="submit" style={{ backgroundColor: "#15803d", color: "white", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: "500", cursor: "pointer" }}>
               Add Cause
             </button>
           </form>
